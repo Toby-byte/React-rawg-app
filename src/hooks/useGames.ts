@@ -1,28 +1,25 @@
-import { useEffect, useState } from "react";
-import apiClient from "../services/api-client";
+import { GameQuery } from "../App";
+import useData from "./useData";
+import { Platform } from "./usePlatforms";
 
-interface Game {
+export interface Game {
   id: number;
   name: string;
+  background_image: string;
+  parent_platforms: { platform: Platform }[];
+  metacritic: number;
 }
 
-interface GamesResponse {
-  count: number;
-  results: Game[];
-}
-
-const useGames = () => {
-  const [games, setGames] = useState<Game[]>([]);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    apiClient
-      .get<GamesResponse>("/games")
-      .then((response) => setGames(response.data.results))
-      .catch((error) => setError(error.message));
-  }, []);
-
-  return { games, error };
-};
-
+const useGames = (gameQuery: GameQuery) =>
+  useData<Game>(
+    "/games",
+    {
+      params: {
+        genres: gameQuery.genre?.id,
+        parent_platforms: gameQuery.platform?.id,
+        stores: gameQuery.store?.id,
+      },
+    },
+    [gameQuery]
+  );
 export default useGames;
